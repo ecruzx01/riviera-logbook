@@ -166,12 +166,24 @@
         }
     }
 
-    async function enviar(data) {
-        try {
-            await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-            alert("✅ Drive Actualizado");
-        } catch (e) { alert("❌ Error Red"); }
+async function enviar(data) {
+    try {
+        // Añadimos un pequeño log para ver si intenta enviar
+        console.log("Enviando a Drive...", data);
+        
+        await fetch(scriptURL, { 
+            method: 'POST', 
+            mode: 'no-cors', // Importante para Google Scripts
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data) 
+        });
+        alert("✅ Registrado en Google Drive");
+    } catch (e) { 
+        console.error("Error de conexión:", e);
+        alert("❌ Error de red: No se pudo conectar a Google Sheets"); 
     }
+}
 
     document.getElementById('newTripDate').value = new Date().toISOString().split('T')[0];
     document.getElementById('fechaGasto').value = new Date().toISOString().split('T')[0];
@@ -179,3 +191,4 @@
 </script>
 </body>
 </html>
+
