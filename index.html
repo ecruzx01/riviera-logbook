@@ -94,16 +94,14 @@
 const scriptURL = 'https://script.google.com/macros/s/AKfycbzPCH6rX8lhMjiFlr7J-3x1f3Ce3v9Uy3eVIzZ9kBEZGncH0QhVQjoIPYH0s-BruZ8S/exec';
 let listaViajes = [];
 
-// CARGAR DATA LOCAL AL INICIAR
+// Cargar datos al iniciar
 window.onload = () => {
-    const backup = localStorage.getItem('backup_gastos');
-    if(backup) {
-        console.log("Respaldo local detectado");
-        // Aquí podrías mostrar un aviso de que hay data guardada localmente
-    }
+    document.getElementById('newTripDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('fechaGasto').value = new Date().toISOString().split('T')[0];
     cargarViajes();
 };
 
+// FUNCIÓN PARA CARGAR VIAJES DESDE DRIVE
 async function cargarViajes(nombreASeleccionar = null) {
     try {
         const response = await fetch(scriptURL);
@@ -118,20 +116,39 @@ async function cargarViajes(nombreASeleccionar = null) {
             updateTotalDisplay();
         }
     } catch (e) { 
-        alert("⚠️ Sin conexión. Usando datos locales.");
+        console.error("Error cargando viajes");
     }
 }
 
+// ACTUALIZAR EL TOTAL VISUAL
 function updateTotalDisplay() {
     const nombre = document.getElementById('tripSelect').value;
     const viaje = listaViajes.find(v => v.nombre === nombre);
     document.getElementById('displayTotal').innerText = viaje ? `$${viaje.total.toFixed(2)}` : "$0.00";
 }
 
+// NUEVA FUNCIÓN: CREAR VIAJE (CON RESPALDO LOCAL)
+async function createNewTrip() {
+    const dest = document.getElementById('newTripDest').value;
+    const date = document.getElementById('newTripDate').value;
+    if(!dest || !date) return alert("Por favor ingresa destino y fecha");
+    
+    const uniqueTripName = `${dest} - ${date}`;
+    const payload = { type: "NUEVO_VIAJE", tripName: uniqueTripName, fecha: date };
+
+    // Respaldo local del viaje
+    guardarLocalmente('viajes_creados', payload);
+
+    await enviar(payload);
+    document.getElementById('newTripDest').value = "";
+    await cargarViajes(uniqueTripName);
+}
+
+// REGISTRAR GASTO (CON RESPALDO LOCAL)
 async function addExpense() {
     const name = document.getElementById('tripSelect').value;
     const monto = parseFloat(document.getElementById('monto').value);
-    if(!name || isNaN(monto)) return alert("Elige viaje e ingresa monto");
+    if(!name || isNaN(monto)) return alert("Selecciona viaje e ingresa monto");
 
     const nuevoGasto = {
         type: "GASTO_DETALLE",
@@ -141,38 +158,34 @@ async function addExpense() {
         fecha: document.getElementById('fechaGasto').value
     };
 
-    // --- GUARDADO LOCAL (RESPALDO) ---
-    let historial = JSON.parse(localStorage.getItem('backup_gastos')) || [];
-    historial.push(nuevoGasto);
-    localStorage.setItem('backup_gastos', JSON.stringify(historial));
-    // ---------------------------------
+    // Respaldo local del gasto
+    guardarLocalmente('backup_gastos', nuevoGasto);
 
     await enviar(nuevoGasto);
     document.getElementById('monto').value = "";
     setTimeout(() => cargarViajes(name), 1500);
 }
 
+// FUNCIÓN GENÉRICA PARA GUARDAR EN MEMORIA DEL TELÉFONO
+function guardarLocalmente(clave, data) {
+    let historial = JSON.parse(localStorage.getItem(clave)) || [];
+    historial.push(data);
+    localStorage.setItem(clave, JSON.stringify(historial));
+}
+
+// FUNCIÓN PARA ENVIAR A GOOGLE DRIVE
 async function enviar(data) {
     try {
         await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-        alert("✅ Guardado en Drive y Respaldo Local");
+        alert("✅ Registrado en Drive y Localmente");
     } catch (e) { 
-        alert("📡 Error de red: Gasto guardado solo en el teléfono temporalmente."); 
+        alert("⚠️ Error de red. La información quedó guardada en el teléfono."); 
     }
-}</script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('./sw.js').then(function(registration) {
-        console.log('ServiceWorker registrado');
-      }, function(err) {
-        console.log('Error en ServiceWorker', err);
-      });
-    });
-  }
+}
 </script>
 </body>
 </html>
+
 
 
 
