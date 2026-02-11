@@ -1,11 +1,11 @@
 {
   "short_name": "Riviera 53",
   "name": "Riviera 53 Logbook",
-  "icons": [
+"icons": [
     {
-      "src": "https://raw.githubusercontent.com/googleusercontent/image_generation_content/0/image_c35e16.png",
-      "type": "image/png",
+      "src": "icon.png",
       "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
