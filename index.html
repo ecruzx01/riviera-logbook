@@ -1,196 +1,181 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<link rel="icon" type="image/png" href="icon.png">
-<link rel="apple-touch-icon" href="icon.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="application-name" content="Riviera 53">
-<meta name="apple-mobile-web-app-title" content="Riviera 53">
-<link rel="manifest" href="manifest.json">
-
-<link rel="icon" sizes="512x512" href="https://raw.githubusercontent.com/googleusercontent/image_generation_content/0/image_c35e16.png">
-<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/googleusercontent/image_generation_content/0/image_c35e16.png">
-    <title>Riviera 53 Logbook</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#001f3f">
+    <link rel="manifest" href="manifest.json">
+    <title>Riviera 53 - Fleet Command</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #001f3f; padding: 10px; color: #333; margin: 0; }
         .card { background: white; padding: 20px; border-radius: 20px; max-width: 450px; margin: 10px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h2 { color: #004080; text-align: center; margin-bottom: 15px; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
-        .section-header { color: #005a9c; font-weight: bold; margin-top: 15px; font-size: 14px; border-left: 5px solid #005a9c; padding: 6px 10px; background: #f0f7ff; border-radius: 0 5px 5px 0; }
+        
+        /* Sistema de Pestañas */
+        .tab-container { display: flex; background: #002b55; border-radius: 12px; margin-bottom: 20px; padding: 5px; }
+        .tab { flex: 1; text-align: center; padding: 10px; color: white; cursor: pointer; border-radius: 8px; font-size: 13px; font-weight: bold; transition: 0.3s; }
+        .tab.active { background: white; color: #001f3f; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        h2 { color: #004080; text-align: center; margin-bottom: 15px; font-size: 20px; text-transform: uppercase; }
+        .section-header { color: #005a9c; font-weight: bold; margin-top: 15px; font-size: 14px; border-left: 5px solid #005a9c; padding: 6px 10px; background: #f0f7ff; }
         label { display: block; margin-top: 10px; font-weight: 600; font-size: 12px; color: #666; }
-        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
-        input:focus { border-color: #005a9c; outline: none; box-shadow: 0 0 5px rgba(0,90,156,0.2); }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-blue { background: #005a9c; color: white; }
         .btn-orange { background: #e67e22; color: white; margin-top: 15px; }
-        .btn:active { transform: translateY(2px); box-shadow: none; }
-        .total-box { background: #eef6ff; padding: 20px; border-radius: 15px; margin-top: 25px; border: 2px solid #004080; text-align: center; }
-        .total-label { font-size: 13px; color: #004080; font-weight: bold; text-transform: uppercase; }
-        .total-amount { font-size: 32px; font-weight: bold; color: #d9534f; display: block; margin-top: 5px; }
+        
+        /* Estilos Auditoría */
+        .result-box { background: #001f3f; color: white; padding: 20px; border-radius: 15px; text-align: center; margin-top: 20px; }
+        .result-val { font-size: 32px; font-weight: bold; color: #2ecc71; display: block; }
+        .total-box { background: #eef6ff; padding: 15px; border-radius: 15px; margin-top: 20px; border: 2px solid #004080; text-align: center; }
+        .total-amount { font-size: 28px; font-weight: bold; color: #d9534f; display: block; }
         .footer { font-size: 10px; color: #aaa; text-align: center; margin-top: 20px; padding-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Riviera 53 - Logbook</h2>
-    
-    <div class="section-header">Selección de Travesía</div>
-    <label>Viajes en Archivo:</label>
-    <select id="tripSelect" onchange="updateTotalDisplay()">
-        <option value="">-- Conectando con Drive... --</option>
-    </select>
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <div>
-            <label>Nuevo Destino:</label>
-            <input type="text" id="newTripDest" placeholder="Ej: BVI">
-        </div>
-        <div>
-            <label>Fecha Salida:</label>
-            <input type="date" id="newTripDate">
-        </div>
-    </div>
-    <button class="btn btn-blue" onclick="createNewTrip()">🚀 CREAR NUEVA EXPEDICIÓN</button>
-
-    <div class="section-header">Registro de Gastos</div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <div>
-            <label>Fecha Gasto:</label>
-            <input type="date" id="fechaGasto">
-        </div>
-        <div>
-            <label>Categoría:</label>
-            <select id="cat">
-                <option value="Combustible">⛽ Diesel</option>
-                <option value="Muelle">⚓ Muelle</option>
-                <option value="Groceries">🛒 Comida</option>
-                <option value="F&B">🍽️ F&B</option>
-                <option value="Shopping">🛍️ Shop</option>
-                <option value="Otros Gastos">⚙️ Otros</option>
-            </select>
-        </div>
-    </div>
-    
-    <label>Monto a Registrar ($):</label>
-    <input type="number" id="monto" placeholder="0.00" step="0.01" inputmode="decimal">
-    
-    <button class="btn btn-orange" onclick="addExpense()">➕ REGISTRAR PARTIDA</button>
-
-    <div class="total-box">
-        <span class="total-label">Inversión Total del Viaje:</span>
-        <span id="displayTotal" class="total-amount">$0.00</span>
+    <div class="tab-container">
+        <div class="tab active" onclick="switchTab('logbook')">LOGBOOK</div>
+        <div class="tab" onclick="switchTab('auditor')">FUEL AUDITOR</div>
     </div>
 
-    <div class="footer">
-        Casco: RIY53032D415 | Enterprise Manager v7.5<br>
-        © 2026 Edwin's Fleet Management
+    <div id="logbook" class="tab-content active">
+        <h2>Bitácora de Gastos</h2>
+        <label>Viaje Actual:</label>
+        <select id="tripSelect" onchange="updateTotalDisplay()">
+            <option value="">-- Conectando... --</option>
+        </select>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><label>Nuevo Destino:</label><input type="text" id="newTripDest" placeholder="Ej: Culebra"></div>
+            <div><label>Fecha Salida:</label><input type="date" id="newTripDate"></div>
+        </div>
+        <button class="btn btn-blue" onclick="createNewTrip()">🚀 CREAR EXPEDICIÓN</button>
+
+        <div class="section-header">Registro Diario</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><label>Fecha Gasto:</label><input type="date" id="fechaGasto"></div>
+            <div>
+                <label>Categoría:</label>
+                <select id="cat">
+                    <option value="Combustible">⛽ Diesel</option>
+                    <option value="Muelle">⚓ Muelle</option>
+                    <option value="Groceries">🛒 Comida</option>
+                    <option value="F&B">🍽️ F&B</option>
+                    <option value="Otros">⚙️ Otros</option>
+                </select>
+            </div>
+        </div>
+        <label>Monto ($):</label>
+        <input type="number" id="monto" placeholder="0.00" inputmode="decimal">
+        <button class="btn btn-orange" onclick="addExpense()">➕ REGISTRAR PARTIDA</button>
+
+        <div class="total-box">
+            <span style="font-size:12px; font-weight:bold; color:#004080;">TOTAL ACUMULADO:</span>
+            <span id="displayTotal" class="total-amount">$0.00</span>
+        </div>
     </div>
+
+    <div id="auditor" class="tab-content">
+        <h2>Confirmar Consumo</h2>
+        <p style="text-align:center; font-size:12px; color:#666;">Basado en 51 GPH ideales</p>
+        
+        <label>Galones Consumidos (Reales):</label>
+        <input type="number" id="galReal" placeholder="Lo que echaste en el tanque" oninput="calcFuel()">
+        
+        <label>Horas de Motor (Trayecto):</label>
+        <input type="number" id="hrsReal" placeholder="Horas exactas" oninput="calcFuel()">
+
+        <div class="result-box">
+            <span style="font-size: 13px; opacity: 0.8;">TU CONSUMO REAL:</span>
+            <span id="resGPH" class="result-val">0.0</span>
+            <span style="font-size: 16px;">GPH (Combinado)</span>
+            <div id="fuelStatus" style="margin-top:10px; font-size:13px; font-weight:bold;"></div>
+        </div>
+        <p style="font-size:11px; margin-top:15px;">* Un consumo mayor a 51 GPH a 2100 RPM puede indicar necesidad de limpieza de fondo o revisión de motores.</p>
+    </div>
+
+    <div class="footer">Casco: RIY53032D415 | Fleet Command v8.0</div>
 </div>
 
 <script>
-const scriptURL = 'https://script.google.com/macros/s/AKfycbzPCH6rX8lhMjiFlr7J-3x1f3Ce3v9Uy3eVIzZ9kBEZGncH0QhVQjoIPYH0s-BruZ8S/exec';
-let listaViajes = [];
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzPCH6rX8lhMjiFlr7J-3x1f3Ce3v9Uy3eVIzZ9kBEZGncH0QhVQjoIPYH0s-BruZ8S/exec
+';
+    let listaViajes = [];
 
-// Cargar datos al iniciar
-window.onload = () => {
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    async function cargarViajes(nombreASeleccionar = null) {
+        try {
+            const response = await fetch(scriptURL);
+            listaViajes = await response.json();
+            const select = document.getElementById('tripSelect');
+            select.innerHTML = '<option value="">-- Selecciona viaje --</option>';
+            listaViajes.forEach(v => {
+                select.innerHTML += `<option value="${v.nombre}">${v.nombre}</option>`;
+            });
+            if (nombreASeleccionar) { select.value = nombreASeleccionar; updateTotalDisplay(); }
+        } catch (e) { console.error("Error Drive"); }
+    }
+
+    function updateTotalDisplay() {
+        const nombre = document.getElementById('tripSelect').value;
+        const viaje = listaViajes.find(v => v.nombre === nombre);
+        document.getElementById('displayTotal').innerText = viaje ? `$${viaje.total.toFixed(2)}` : "$0.00";
+    }
+
+    async function createNewTrip() {
+        const dest = document.getElementById('newTripDest').value;
+        const date = document.getElementById('newTripDate').value;
+        if(!dest || !date) return alert("Faltan datos");
+        const name = `${dest} - ${date}`;
+        await enviar({ type: "NUEVO_VIAJE", tripName: name, fecha: date });
+        document.getElementById('newTripDest').value = "";
+        cargarViajes(name);
+    }
+
+    async function addExpense() {
+        const name = document.getElementById('tripSelect').value;
+        const monto = parseFloat(document.getElementById('monto').value);
+        if(!name || isNaN(monto)) return alert("Revisa los datos");
+        await enviar({ type: "GASTO_DETALLE", tripName: name, categoria: document.getElementById('cat').value, monto: monto, fecha: document.getElementById('fechaGasto').value });
+        document.getElementById('monto').value = "";
+        setTimeout(() => cargarViajes(name), 1500);
+    }
+
+    function calcFuel() {
+        const gal = parseFloat(document.getElementById('galReal').value) || 0;
+        const hrs = parseFloat(document.getElementById('hrsReal').value) || 0;
+        if(gal > 0 && hrs > 0) {
+            const real = gal / hrs;
+            document.getElementById('resGPH').innerText = real.toFixed(1);
+            const status = document.getElementById('fuelStatus');
+            const diff = real - 51;
+            if(Math.abs(diff) < 2) { status.innerText = "✅ DENTRO DEL RANGO (51 GPH)"; status.style.color = "#2ecc71"; }
+            else if(diff > 2) { status.innerText = "⚠️ CONSUMO ELEVADO (+" + diff.toFixed(1) + ")"; status.style.color = "#e74c3c"; }
+            else { status.innerText = "⚓ EFICIENCIA SUPERIOR"; status.style.color = "#3498db"; }
+        }
+    }
+
+    async function enviar(data) {
+        try {
+            await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+            alert("✅ Drive Actualizado");
+        } catch (e) { alert("❌ Error Red"); }
+    }
+
     document.getElementById('newTripDate').value = new Date().toISOString().split('T')[0];
     document.getElementById('fechaGasto').value = new Date().toISOString().split('T')[0];
     cargarViajes();
-};
-
-// FUNCIÓN PARA CARGAR VIAJES DESDE DRIVE
-async function cargarViajes(nombreASeleccionar = null) {
-    try {
-        const response = await fetch(scriptURL);
-        listaViajes = await response.json();
-        const select = document.getElementById('tripSelect');
-        select.innerHTML = '<option value="">-- Selecciona un viaje --</option>';
-        listaViajes.forEach(v => {
-            select.innerHTML += `<option value="${v.nombre}">${v.nombre}</option>`;
-        });
-        if (nombreASeleccionar) {
-            select.value = nombreASeleccionar;
-            updateTotalDisplay();
-        }
-    } catch (e) { 
-        console.error("Error cargando viajes");
-    }
-}
-
-// ACTUALIZAR EL TOTAL VISUAL
-function updateTotalDisplay() {
-    const nombre = document.getElementById('tripSelect').value;
-    const viaje = listaViajes.find(v => v.nombre === nombre);
-    document.getElementById('displayTotal').innerText = viaje ? `$${viaje.total.toFixed(2)}` : "$0.00";
-}
-
-// NUEVA FUNCIÓN: CREAR VIAJE (CON RESPALDO LOCAL)
-async function createNewTrip() {
-    const dest = document.getElementById('newTripDest').value;
-    const date = document.getElementById('newTripDate').value;
-    if(!dest || !date) return alert("Por favor ingresa destino y fecha");
-    
-    const uniqueTripName = `${dest} - ${date}`;
-    const payload = { type: "NUEVO_VIAJE", tripName: uniqueTripName, fecha: date };
-
-    // Respaldo local del viaje
-    guardarLocalmente('viajes_creados', payload);
-
-    await enviar(payload);
-    document.getElementById('newTripDest').value = "";
-    await cargarViajes(uniqueTripName);
-}
-
-// REGISTRAR GASTO (CON RESPALDO LOCAL)
-async function addExpense() {
-    const name = document.getElementById('tripSelect').value;
-    const monto = parseFloat(document.getElementById('monto').value);
-    if(!name || isNaN(monto)) return alert("Selecciona viaje e ingresa monto");
-
-    const nuevoGasto = {
-        type: "GASTO_DETALLE",
-        tripName: name,
-        categoria: document.getElementById('cat').value,
-        monto: monto,
-        fecha: document.getElementById('fechaGasto').value
-    };
-
-    // Respaldo local del gasto
-    guardarLocalmente('backup_gastos', nuevoGasto);
-
-    await enviar(nuevoGasto);
-    document.getElementById('monto').value = "";
-    setTimeout(() => cargarViajes(name), 1500);
-}
-
-// FUNCIÓN GENÉRICA PARA GUARDAR EN MEMORIA DEL TELÉFONO
-function guardarLocalmente(clave, data) {
-    let historial = JSON.parse(localStorage.getItem(clave)) || [];
-    historial.push(data);
-    localStorage.setItem(clave, JSON.stringify(historial));
-}
-
-// FUNCIÓN PARA ENVIAR A GOOGLE DRIVE
-async function enviar(data) {
-    try {
-        await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-        alert("✅ Registrado en Drive y Localmente");
-    } catch (e) { 
-        alert("⚠️ Error de red. La información quedó guardada en el teléfono."); 
-    }
-}
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
