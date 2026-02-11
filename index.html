@@ -91,9 +91,9 @@
 </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzPCH6rX8lhMjiFlr7J-3x1f3Ce3v9Uy3eVIzZ9kBEZGncH0QhVQjoIPYH0s-BruZ8S/exec';
-    let listaViajes = [];
-    
+const scriptURL = 'https://script.google.com/macros/s/AKfycbzPCH6rX8lhMjiFlr7J-3x1f3Ce3v9Uy3eVIzZ9kBEZGncH0QhVQjoIPYH0s-BruZ8S/exec';
+let listaViajes = [];
+
 // CARGAR DATA LOCAL AL INICIAR
 window.onload = () => {
     const backup = localStorage.getItem('backup_gastos');
@@ -159,8 +159,7 @@ async function enviar(data) {
     } catch (e) { 
         alert("📡 Error de red: Gasto guardado solo en el teléfono temporalmente."); 
     }
-}
-</script>
+}</script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
@@ -174,6 +173,7 @@ async function enviar(data) {
 </script>
 </body>
 </html>
+
 
 
 
