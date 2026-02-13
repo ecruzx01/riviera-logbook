@@ -137,8 +137,7 @@
     </div>
 </div>
 
-<script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbyZEmBTB7xtMUngAfG3RmfKSwNhrLibrbe1WejAmyUNwzfPolDiRKyeWyvGt2rCKsS1/exec';
+<script>const scriptURL = 'https://script.google.com/macros/s/AKfycbyZEmBTB7xtMUngAfG3RmfKSwNhrLibrbe1WejAmyUNwzfPolDiRKyeWyvGt2rCKsS1/exec';
     let listaViajes = [];
 
     function switchTab(tabId) {
@@ -161,24 +160,26 @@
         }
     }
 
-async function cargarViajes(nombreASeleccionar = null) {
+    // CARGA DE VIAJES CORREGIDA
+    async function cargarViajes(nombreASeleccionar = null) {
         const select = document.getElementById('tripSelect');
-        // Esto asegura que el mensaje salga mientras carga
+        // Mantener el mensaje de carga mientras llegan los datos
         select.innerHTML = '<option value="">-- Selecciona viaje --</option>';
         
         try {
             const response = await fetch(scriptURL);
             listaViajes = await response.json();
             
-            // Volvemos a limpiar para insertar los viajes reales
-            select.innerHTML = '<option value="">-- Selecciona viaje --</option>';
+            // Re-escribir el menú solo una vez al recibir la data
+            let options = '<option value="">-- Selecciona viaje --</option>';
             
-            if (listaViajes.length > 0) {
+            if (listaViajes && listaViajes.length > 0) {
                 listaViajes.forEach(v => {
-                    select.innerHTML += `<option value="${v.nombre}">${v.nombre}</option>`;
+                    options += `<option value="${v.nombre}">${v.nombre}</option>`;
                 });
+                select.innerHTML = options;
             } else {
-                select.innerHTML = '<option value="">No hay viajes guardados</option>';
+                select.innerHTML = '<option value="">No hay viajes en Drive</option>';
             }
 
             if (nombreASeleccionar) { 
@@ -187,9 +188,10 @@ async function cargarViajes(nombreASeleccionar = null) {
             }
         } catch (e) { 
             console.error("Error Drive");
-            select.innerHTML = '<option value="">❌ Error al cargar</option>';
+            select.innerHTML = '<option value="">❌ Error de conexión</option>';
         }
     }
+
     function updateTotalDisplay() {
         const nombre = document.getElementById('tripSelect').value;
         const viaje = listaViajes.find(v => v.nombre === nombre);
@@ -210,7 +212,7 @@ async function cargarViajes(nombreASeleccionar = null) {
         const name = document.getElementById('tripSelect').value;
         const monto = parseFloat(document.getElementById('monto').value);
         if(!name || isNaN(monto)) return alert("Selecciona viaje y pon monto");
-        await enviar({ type: "GASTO_DETALLE", tripName: name, categoria: document.getElementById('cat').value, monto: monto, fecha: document.getElementById('fechaGasto').value });
+        await enviar({ type: "GASTO_DETALLE", tripName: name, categoria: document.getElementById('cat').value, monto: monto, fecha: new Date().toISOString().split('T')[0] });
         document.getElementById('monto').value = "";
         setTimeout(() => cargarViajes(name), 1500);
     }
@@ -231,14 +233,17 @@ async function cargarViajes(nombreASeleccionar = null) {
 
     async function enviar(data) {
         try {
-            await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+            await fetch(scriptURL, { method: 'POST', mode: 'no-cors', cache: 'no-cache', body: JSON.stringify(data) });
             alert("✅ Drive Actualizado");
         } catch (e) { alert("❌ Error"); }
     }
 
-    document.getElementById('newTripDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('fechaGasto').value = new Date().toISOString().split('T')[0];
-    window.onload = cargarViajes;
+    // Inicialización al cargar la ventana
+    window.onload = function() {
+        document.getElementById('newTripDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('fechaGasto').value = new Date().toISOString().split('T')[0];
+        cargarViajes();
+    };
 </script>
 </body>
 </html>
