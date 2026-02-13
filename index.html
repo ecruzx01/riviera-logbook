@@ -9,7 +9,7 @@
     <title>Riviera 53 - Fleet Command</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #001f3f; padding: 10px; color: #333; margin: 0; }
-        .card { background: white; padding: 20px; border-radius: 25px; max-width: 480px; margin: 10px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
+        .card { background: white; padding: 20px; border-radius: 25px; max-width: 480px; margin: 10px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
         /* Sistema de Pestañas */
         .tab-container { display: flex; background: #002b55; border-radius: 12px; margin-bottom: 20px; padding: 5px; gap: 5px; }
@@ -19,23 +19,26 @@
         .tab-content.active { display: block; }
 
         h2 { color: #004080; text-align: center; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; }
+        .section-header { color: #005a9c; font-weight: bold; margin-top: 15px; font-size: 13px; border-left: 5px solid #005a9c; padding: 6px 10px; background: #f0f7ff; }
         label { display: block; margin-top: 10px; font-weight: 600; font-size: 11px; color: #666; text-transform: uppercase; }
         input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; font-weight: bold; }
 
-        /* Estilos Range Pro */
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-blue { background: #005a9c; color: white; }
+        .btn-orange { background: #e67e22; color: white; margin-top: 15px; }
+
+        /* Range Pro Styles */
         .engine-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .engine-box { background: #f8fafc; padding: 12px; border-radius: 15px; border-top: 4px solid #004080; }
         .result-box { background: #0f172a; color: white; padding: 20px; border-radius: 18px; text-align: center; margin-top: 15px; border: 2px solid #2ecc71; }
         .result-val { font-size: 42px; font-weight: 900; color: #2ecc71; display: block; line-height: 1; }
         
-        /* Modal de Referencia */
         #refModal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); overflow-y: auto; }
         .modal-content { background: white; margin: 10% auto; padding: 15px; border-radius: 15px; width: 90%; max-width: 400px; font-size: 12px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background: #001f3f; color: white; }
 
-        .btn-ref { background: #005a9c; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-size: 10px; font-weight: bold; cursor: pointer; float: right; margin-top: -35px; }
         .footer { font-size: 9px; color: #aaa; text-align: center; margin-top: 20px; }
     </style>
 </head>
@@ -43,42 +46,60 @@
 
 <div class="card">
     <div class="tab-container">
-        <div class="tab active" onclick="switchTab('logbook')">LOGBOOK</div>
-        <div class="tab" onclick="switchTab('auditor')">AUDITOR</div>
-        <div class="tab" onclick="switchTab('range')">RANGE PRO</div>
+        <div id="tab-logbook" class="tab active" onclick="switchTab('logbook')">LOGBOOK</div>
+        <div id="tab-auditor" class="tab" onclick="switchTab('auditor')">AUDITOR</div>
+        <div id="tab-range" class="tab" onclick="switchTab('range')">RANGE PRO</div>
+    </div>
+
+    <div id="logbook" class="tab-content active">
+        <h2>Bitácora de Gastos</h2>
+        <label>Viaje Actual:</label>
+        <select id="tripSelect" onchange="updateTotalDisplay()"><option value="">Conectando...</option></select>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><label>Nuevo Destino:</label><input type="text" id="newTripDest" placeholder="Ej: Culebra"></div>
+            <div><label>Fecha Salida:</label><input type="date" id="newTripDate"></div>
+        </div>
+        <button class="btn btn-blue" onclick="createNewTrip()">🚀 CREAR EXPEDICIÓN</button>
+        <div class="section-header">Registro Diario</div>
+        <label>Monto ($):</label><input type="number" id="monto" placeholder="0.00" inputmode="decimal">
+        <button class="btn btn-orange" onclick="addExpense()">➕ REGISTRAR PARTIDA</button>
+        <div id="displayTotal" style="font-size: 28px; font-weight: bold; color: #d9534f; text-align: center; margin-top: 15px;">$0.00</div>
+    </div>
+
+    <div id="auditor" class="tab-content">
+        <h2>Confirmar Consumo</h2>
+        <p style="text-align:center; font-size:11px; color:#666;">Ref: 51 GPH @ 2100 RPM</p>
+        <label>Galones Consumidos:</label><input type="number" id="galReal" oninput="calcFuelAudit()">
+        <label>Horas de Motor:</label><input type="number" id="hrsReal" step="0.1" oninput="calcFuelAudit()">
+        <div class="result-box" style="background:#001f3f;">
+            <span id="resGPH" class="result-val">0.0</span>
+            <span style="font-size: 14px; font-weight: bold;">GPH REAL</span>
+            <div id="fuelStatus" style="margin-top:10px; font-size:12px; font-weight:bold;"></div>
+        </div>
     </div>
 
     <div id="range" class="tab-content">
-        <button class="btn-ref" onclick="toggleModal(true)">📊 REF</button>
-        <h2>Safe Range Estimator</h2>
-        <label>Combustible Actual (Gal):</label>
-        <input type="number" id="fuelRange" placeholder="900" oninput="calculateRange()">
-        
+        <button onclick="toggleModal(true)" style="float:right; background:#005a9c; color:white; border:none; padding:5px 10px; border-radius:10px; font-size:10px;">📊 REF</button>
+        <h2>Safe Range Pro</h2>
+        <label>Combustible Actual (Gal):</label><input type="number" id="fuelRange" oninput="calculateRange()">
         <div class="engine-grid">
             <div class="engine-box">
                 <span style="font-size:9px; font-weight:bold; color:#004080; display:block; text-align:center;">PORT (MASTER)</span>
-                <label>RPM:</label><input type="number" id="rpmP" placeholder="0" oninput="syncRPM()">
-                <label style="margin-top:5px;">GPH:</label><input type="number" id="gphP" placeholder="0.0" oninput="calculateRange()">
+                <label>RPM:</label><input type="number" id="rpmP" oninput="syncRPM()">
+                <label>GPH:</label><input type="number" id="gphP" oninput="calculateRange()">
             </div>
             <div class="engine-box" style="border-top-color: #ef4444;">
                 <span style="font-size:9px; font-weight:bold; color:#ef4444; display:block; text-align:center;">STBD (INDEP.)</span>
-                <label>RPM:</label><input type="number" id="rpmS" placeholder="0" oninput="calculateRange()">
-                <label style="margin-top:5px;">GPH:</label><input type="number" id="gphS" placeholder="0.0" oninput="calculateRange()">
+                <label>RPM:</label><input type="number" id="rpmS" oninput="calculateRange()">
+                <label>GPH:</label><input type="number" id="gphS" oninput="calculateRange()">
             </div>
         </div>
-        
-        <label>SOG (Knots):</label>
-        <input type="number" id="knotsRange" placeholder="24.8" oninput="calculateRange()">
-        
+        <label>SOG (Knots):</label><input type="number" id="knotsRange" oninput="calculateRange()">
         <div class="result-box">
-            <span style="font-size: 11px; opacity: 0.8;">AUTONOMÍA (10% RESERVA)</span>
             <span id="resRange" class="result-val">0</span>
-            <span style="font-size: 14px; font-weight: bold;">MILLAS NÁUTICAS</span>
+            <span style="font-size: 14px; font-weight: bold;">MILLAS (10% RES)</span>
         </div>
     </div>
-
-    <div id="logbook" class="tab-content active"><h2>Bitácora</h2></div>
-    <div id="auditor" class="tab-content"><h2>Auditor</h2></div>
 
     <div class="footer">Casco: RIY53032D415 | Fleet Command v9.1</div>
 </div>
@@ -87,29 +108,60 @@
     <div class="modal-content">
         <h3 style="color:#004080; margin-top:0;">📈 Ref. Casco RIY53032D415</h3>
         <table>
-            <thead>
-                <tr><th>RPM</th><th>Kts</th><th>GPH</th><th>NM*</th></tr>
-            </thead>
+            <thead><tr><th>RPM</th><th>Kts</th><th>GPH</th><th>NM*</th></tr></thead>
             <tbody>
-                <tr><td>600</td><td>6.0</td><td>2.5</td><td>1,998</td></tr>
-                <tr><td>1000</td><td>9.0</td><td>8.0</td><td>936</td></tr>
                 <tr><td>1500</td><td>12.0</td><td>22.0</td><td>454</td></tr>
-                <tr><td>1800</td><td>17.5</td><td>36.0</td><td>405</td></tr>
-                <tr><td>2000</td><td>22.5</td><td>46.0</td><td>407</td></tr>
-                <tr style="background:#eef6ff; font-weight:bold;"><td>2100</td><td>24.8</td><td>51.0</td><td>405</td></tr>
+                <tr style="background:#eef6ff; font-weight:bold; color:#005a9c;"><td>2100</td><td>24.8</td><td>51.0</td><td>405</td></tr>
                 <tr><td>2500</td><td>33.5</td><td>74.0</td><td>377</td></tr>
             </tbody>
         </table>
-        <p style="font-size:10px; color:#666;">*Autonomía teórica 100% tanque.</p>
         <button onclick="toggleModal(false)" style="width:100%; padding:10px; background:#d9534f; color:white; border:none; border-radius:10px; margin-top:10px; font-weight:bold;">CERRAR</button>
     </div>
 </div>
 
 <script>
-    function toggleModal(show) {
-        document.getElementById('refModal').style.display = show ? 'block' : 'none';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyZEmBTB7xtMUngAfG3RmfKSwNhrLibrbe1WejAmyUNwzfPolDiRKyeWyvGt2rCKsS1/exec';
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        document.getElementById('tab-' + tabId).classList.add('active');
     }
-    // ... resto del script previo ...
+
+    function toggleModal(show) { document.getElementById('refModal').style.display = show ? 'block' : 'none'; }
+    function syncRPM() { document.getElementById('rpmS').value = document.getElementById('rpmP').value; calculateRange(); }
+
+    function calculateRange() {
+        const fuel = parseFloat(document.getElementById('fuelRange').value) || 0;
+        const totalBurn = (parseFloat(document.getElementById('gphP').value) || 0) + (parseFloat(document.getElementById('gphS').value) || 0);
+        const knots = parseFloat(document.getElementById('knotsRange').value) || 0;
+        if(totalBurn > 0 && knots > 0) {
+            const range = (fuel * 0.90) * (knots / totalBurn);
+            document.getElementById('resRange').innerText = Math.floor(range);
+        }
+    }
+
+    function calcFuelAudit() {
+        const gal = parseFloat(document.getElementById('galReal').value) || 0;
+        const hrs = parseFloat(document.getElementById('hrsReal').value) || 0;
+        if(gal > 0 && hrs > 0) {
+            const real = gal / hrs;
+            document.getElementById('resGPH').innerText = real.toFixed(1);
+        }
+    }
+
+    // Inicialización del Logbook
+    async function cargarViajes() {
+        try {
+            const r = await fetch(scriptURL);
+            const data = await r.json();
+            const s = document.getElementById('tripSelect');
+            s.innerHTML = '<option value="">-- Selecciona --</option>';
+            data.forEach(v => s.innerHTML += `<option value="${v.nombre}">${v.nombre}</option>`);
+        } catch (e) { console.log("Error Drive"); }
+    }
+    cargarViajes();
 </script>
 </body>
 </html>
