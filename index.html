@@ -3,43 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#001f3f">
-    <link rel="manifest" href="manifest.json">
     <title>Riviera 53 - Fleet Command</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #001f3f; padding: 10px; color: #333; margin: 0; }
         .card { background: white; padding: 20px; border-radius: 25px; max-width: 480px; margin: 10px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-
-        /* Sistema de Pestañas */
         .tab-container { display: flex; background: #002b55; border-radius: 12px; margin-bottom: 20px; padding: 5px; gap: 5px; }
         .tab { flex: 1; text-align: center; padding: 12px 5px; color: white; cursor: pointer; border-radius: 8px; font-size: 11px; font-weight: bold; transition: 0.3s; }
         .tab.active { background: white; color: #001f3f; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
         h2 { color: #004080; text-align: center; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; }
-        .section-header { color: #005a9c; font-weight: bold; margin-top: 15px; font-size: 13px; border-left: 5px solid #005a9c; padding: 6px 10px; background: #f0f7ff; }
         label { display: block; margin-top: 10px; font-weight: 600; font-size: 11px; color: #666; text-transform: uppercase; }
         input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; font-weight: bold; }
-
         .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-blue { background: #005a9c; color: white; }
         .btn-orange { background: #e67e22; color: white; margin-top: 15px; }
-
-        /* Range Pro Styles */
-        .engine-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .engine-box { background: #f8fafc; padding: 12px; border-radius: 15px; border-top: 4px solid #004080; }
-        .result-box { background: #0f172a; color: white; padding: 20px; border-radius: 18px; text-align: center; margin-top: 15px; border: 2px solid #2ecc71; }
-        .result-val { font-size: 42px; font-weight: 900; color: #2ecc71; display: block; line-height: 1; }
-        
-        #refModal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); overflow-y: auto; }
-        .modal-content { background: white; margin: 10% auto; padding: 15px; border-radius: 15px; width: 90%; max-width: 400px; font-size: 12px; }
+        .footer { font-size: 9px; color: #aaa; text-align: center; margin-top: 20px; }
+        /* Modal Style */
+        #refModal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); overflow-y: auto; }
+        .modal-content { background: white; margin: 5% auto; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; font-size: 12px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background: #001f3f; color: white; }
-
-        .footer { font-size: 9px; color: #aaa; text-align: center; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -53,92 +38,66 @@
 
     <div id="logbook" class="tab-content active">
         <h2>Bitácora de Gastos</h2>
-        <label>Viaje Actual:</label>
-        <select id="tripSelect" onchange="updateTotalDisplay()"><option value="">Conectando...</option></select>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div><label>Nuevo Destino:</label><input type="text" id="newTripDest" placeholder="Ej: Culebra"></div>
-            <div><label>Fecha Salida:</label><input type="date" id="newTripDate"></div>
+        <label>Seleccionar Viaje:</label>
+        <select id="tripSelect" onchange="updateTotalDisplay()">
+            <option value="">Cargando historial...</option>
+        </select>
+        
+        <div style="background: #eef6ff; padding: 15px; border-radius: 15px; margin-top: 15px; border: 2px solid #004080; text-align: center;">
+            <span style="font-size:11px; font-weight:bold; color:#004080;">TOTAL ACUMULADO:</span>
+            <span id="displayTotal" style="font-size: 28px; font-weight: bold; color: #d9534f; display: block;">$0.00</span>
         </div>
-        <button class="btn btn-blue" onclick="createNewTrip()">🚀 CREAR EXPEDICIÓN</button>
-        <div class="section-header">Registro Diario</div>
-        <label>Monto ($):</label><input type="number" id="monto" placeholder="0.00" inputmode="decimal">
-        <button class="btn btn-orange" onclick="addExpense()">➕ REGISTRAR PARTIDA</button>
-        <div id="displayTotal" style="font-size: 28px; font-weight: bold; color: #d9534f; text-align: center; margin-top: 15px;">$0.00</div>
+
+        <div style="border-top: 1px solid #eee; margin-top: 20px; padding-top: 10px;">
+            <label>Nuevo Destino:</label>
+            <input type="text" id="newTripDest" placeholder="Ej: Culebra">
+            <button class="btn btn-blue" onclick="createNewTrip()">🚀 CREAR EXPEDICIÓN</button>
+        </div>
+
+        <div style="border-top: 1px solid #eee; margin-top: 20px; padding-top: 10px;">
+            <label>Monto del Gasto ($):</label>
+            <input type="number" id="monto" placeholder="0.00" inputmode="decimal">
+            <button class="btn btn-orange" onclick="addExpense()">➕ REGISTRAR GASTO</button>
+        </div>
     </div>
 
     <div id="auditor" class="tab-content">
         <h2>Confirmar Consumo</h2>
-        <p style="text-align:center; font-size:11px; color:#666;">Ref: 51 GPH @ 2100 RPM</p>
-        <label>Galones Consumidos:</label><input type="number" id="galReal" oninput="calcFuelAudit()">
-        <label>Horas de Motor:</label><input type="number" id="hrsReal" step="0.1" oninput="calcFuelAudit()">
-        <div class="result-box" style="background:#001f3f;">
-            <span id="resGPH" class="result-val">0.0</span>
-            <span style="font-size: 14px; font-weight: bold;">GPH REAL</span>
-            <div id="fuelStatus" style="margin-top:10px; font-size:12px; font-weight:bold;"></div>
-        </div>
+        <label>Galones:</label><input type="number" id="galReal" oninput="calcFuelAudit()">
+        <label>Horas:</label><input type="number" id="hrsReal" oninput="calcFuelAudit()">
+        <div style="text-align:center; margin-top:20px; font-size:30px; font-weight:bold;" id="resGPH">0.0 GPH</div>
     </div>
 
     <div id="range" class="tab-content">
         <button onclick="toggleModal(true)" style="float:right; background:#005a9c; color:white; border:none; padding:5px 10px; border-radius:10px; font-size:10px;">📊 REF</button>
         <h2>Safe Range Pro</h2>
-        <label>Combustible Actual (Gal):</label><input type="number" id="fuelRange" oninput="calculateRange()">
-        <div class="engine-grid">
-            <div class="engine-box">
-                <span style="font-size:9px; font-weight:bold; color:#004080; display:block; text-align:center;">PORT (MASTER)</span>
-                <label>RPM:</label><input type="number" id="rpmP" oninput="syncRPM()">
-                <label>GPH:</label><input type="number" id="gphP" oninput="calculateRange()">
-            </div>
-            <div class="engine-box" style="border-top-color: #ef4444;">
-                <span style="font-size:9px; font-weight:bold; color:#ef4444; display:block; text-align:center;">STBD (INDEP.)</span>
-                <label>RPM:</label><input type="number" id="rpmS" oninput="calculateRange()">
-                <label>GPH:</label><input type="number" id="gphS" oninput="calculateRange()">
-            </div>
-        </div>
-        <label>SOG (Knots):</label><input type="number" id="knotsRange" oninput="calculateRange()">
-        <div class="result-box">
-            <span id="resRange" class="result-val">0</span>
-            <span style="font-size: 14px; font-weight: bold;">MILLAS (10% RES)</span>
-        </div>
+        <label>Combustible Actual:</label><input type="number" id="fuelRange" oninput="calculateRange()">
+        <label>Consumo Total (GPH):</label><input type="number" id="gphTotal" oninput="calculateRange()">
+        <label>Velocidad (Knots):</label><input type="number" id="knotsRange" oninput="calculateRange()">
+        <div style="text-align:center; margin-top:20px; font-size:40px; font-weight:bold; color:#2ecc71;" id="resRange">0 NM</div>
     </div>
 
-    <div class="footer">Casco: RIY53032D415 | Fleet Command v9.1</div>
+    <div class="footer">Casco: RIY53032D415 | Fleet Command v9.3</div>
 </div>
 
-<div id="refModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); overflow-y: auto;">
-    <div class="modal-content" style="background: white; margin: 5% auto; padding: 20px; border-radius: 20px; width: 95%; max-width: 450px; box-shadow: 0 5px 25px rgba(0,0,0,0.5);">
-        <h3 style="color:#004080; margin-top:0; text-align:center; font-size:16px;">📈 PERFORMANCE: RIY53032D415</h3>
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-            <thead>
-                <tr style="background: #001f3f; color: white;">
-                    <th style="padding: 8px; border: 1px solid #ddd;">RPM</th>
-                    <th style="padding: 8px; border: 1px solid #ddd;">Kts</th>
-                    <th style="padding: 8px; border: 1px solid #ddd;">GPH</th>
-                    <th style="padding: 8px; border: 1px solid #ddd;">NM*</th>
-                </tr>
-            </thead>
-            <tbody style="text-align: center;">
-                <tr><td>600</td><td>6.0</td><td>2.5</td><td>1,998</td></tr>
-                <tr><td>1000</td><td>9.0</td><td>8.0</td><td>936</td></tr>
-                <tr><td>1500</td><td>12.0</td><td>22.0</td><td>454</td></tr>
-                <tr><td>1800</td><td>17.5</td><td>36.0</td><td>405</td></tr>
-                <tr><td>2000</td><td>22.5</td><td>46.0</td><td>407</td></tr>
-                <tr style="background: #eef6ff; font-weight: bold; color: #005a9c; border: 2px solid #005a9c;">
-                    <td>2100</td><td>24.8</td><td>51.0</td><td>405</td></tr>
-                <tr><td>2200</td><td>27.2</td><td>58.0</td><td>390</td></tr>
-                <tr><td>2300</td><td>29.5</td><td>64.0</td><td>383</td></tr>
-                <tr><td>2500</td><td>33.5</td><td>74.0</td><td>377</td></tr>
+<div id="refModal">
+    <div class="modal-content">
+        <h3 style="color:#004080; margin-top:0; text-align:center;">📈 Tabla de Rendimiento</h3>
+        <table>
+            <thead><tr><th>RPM</th><th>Kts</th><th>GPH</th></tr></thead>
+            <tbody>
+                <tr><td>1500</td><td>12.0</td><td>22.0</td></tr>
+                <tr style="background:#eef6ff; font-weight:bold; color:#005a9c;"><td>2100</td><td>24.8</td><td>51.0</td></tr>
+                <tr><td>2500</td><td>33.5</td><td>74.0</td></tr>
             </tbody>
         </table>
-        <p style="font-size: 9px; color: #666; margin-top: 10px; line-height: 1.2;">
-            * El rango (NM) es teórico basado en el 100% de la capacidad del tanque. 
-            ** Tu App calcula el rango seguro restando un 10% de reserva.
-        </p>
-        <button onclick="toggleModal(false)" style="width:100%; padding:15px; background:#d9534f; color:white; border:none; border-radius:12px; margin-top:10px; font-weight:bold; cursor:pointer;">CERRAR REFERENCIA</button>
+        <button onclick="toggleModal(false)" style="width:100%; padding:12px; background:#d9534f; color:white; border:none; border-radius:10px; margin-top:15px; font-weight:bold;">CERRAR</button>
     </div>
 </div>
 
 <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyZEmBTB7xtMUngAfG3RmfKSwNhrLibrbe1WejAmyUNwzfPolDiRKyeWyvGt2rCKsS1/exec';
+    let listaViajes = [];
 
     function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -148,38 +107,50 @@
     }
 
     function toggleModal(show) { document.getElementById('refModal').style.display = show ? 'block' : 'none'; }
-    function syncRPM() { document.getElementById('rpmS').value = document.getElementById('rpmP').value; calculateRange(); }
 
-    function calculateRange() {
-        const fuel = parseFloat(document.getElementById('fuelRange').value) || 0;
-        const totalBurn = (parseFloat(document.getElementById('gphP').value) || 0) + (parseFloat(document.getElementById('gphS').value) || 0);
-        const knots = parseFloat(document.getElementById('knotsRange').value) || 0;
-        if(totalBurn > 0 && knots > 0) {
-            const range = (fuel * 0.90) * (knots / totalBurn);
-            document.getElementById('resRange').innerText = Math.floor(range);
-        }
-    }
-
-    function calcFuelAudit() {
-        const gal = parseFloat(document.getElementById('galReal').value) || 0;
-        const hrs = parseFloat(document.getElementById('hrsReal').value) || 0;
-        if(gal > 0 && hrs > 0) {
-            const real = gal / hrs;
-            document.getElementById('resGPH').innerText = real.toFixed(1);
-        }
-    }
-
-    // Inicialización del Logbook
-    async function cargarViajes() {
+    // CARGAR DATOS DESDE GOOGLE SHEETS
+    async function cargarViajes(nombreASeleccionar = null) {
         try {
-            const r = await fetch(scriptURL);
-            const data = await r.json();
-            const s = document.getElementById('tripSelect');
-            s.innerHTML = '<option value="">-- Selecciona --</option>';
-            data.forEach(v => s.innerHTML += `<option value="${v.nombre}">${v.nombre}</option>`);
-        } catch (e) { console.log("Error Drive"); }
+            const response = await fetch(scriptURL);
+            listaViajes = await response.json();
+            const select = document.getElementById('tripSelect');
+            select.innerHTML = '<option value="">-- Selecciona un viaje --</option>';
+            listaViajes.forEach(v => {
+                select.innerHTML += `<option value="${v.nombre}">${v.nombre}</option>`;
+            });
+            if (nombreASeleccionar) {
+                select.value = nombreASeleccionar;
+                updateTotalDisplay();
+            }
+        } catch (e) {
+            document.getElementById('tripSelect').innerHTML = '<option>Error al conectar</option>';
+        }
     }
-    cargarViajes();
+
+    function updateTotalDisplay() {
+        const nombre = document.getElementById('tripSelect').value;
+        const viaje = listaViajes.find(v => v.nombre === nombre);
+        document.getElementById('displayTotal').innerText = viaje ? `$${viaje.total.toFixed(2)}` : "$0.00";
+    }
+
+    async function addExpense() {
+        const name = document.getElementById('tripSelect').value;
+        const monto = parseFloat(document.getElementById('monto').value);
+        if(!name || !monto) return alert("Selecciona viaje y pon monto");
+        
+        await fetch(scriptURL, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify({ type: "GASTO_DETALLE", tripName: name, monto: monto, fecha: new Date().toISOString().split('T')[0] }) 
+        });
+        
+        alert("✅ Gasto registrado");
+        document.getElementById('monto').value = "";
+        setTimeout(cargarViajes, 2000); // Recarga para actualizar total
+    }
+
+    // Ejecutar carga al abrir la app
+    window.onload = cargarViajes;
 </script>
 </body>
 </html>
