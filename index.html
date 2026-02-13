@@ -5,33 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#001f3f">
-    <link rel="manifest" href="manifest.json">
-    <title>Riviera 53 - Fleet Command</title>
+    <title>Riviera 53 - Speed Ops</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #001f3f; padding: 10px; color: #333; margin: 0; }
-        .card { background: white; padding: 20px; border-radius: 20px; max-width: 450px; margin: 10px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
-        .tab-container { display: flex; background: #002b55; border-radius: 12px; margin-bottom: 20px; padding: 5px; gap: 5px; }
-        .tab { flex: 1; text-align: center; padding: 10px 5px; color: white; cursor: pointer; border-radius: 8px; font-size: 11px; font-weight: bold; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
-        .tab.active { background: white; color: #001f3f; }
-        .tab-content { display: none; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #001f3f; padding: 10px; color: #333; margin: 0; -webkit-tap-highlight-color: transparent; }
+        .card { background: white; padding: 20px; border-radius: 20px; max-width: 450px; margin: 10px auto; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+        /* Optimizaciones CSS para móvil */
+        input, select, button { touch-action: manipulation; } 
+        
+        .tab-container { display: flex; background: #002b55; border-radius: 12px; margin-bottom: 20px; padding: 4px; }
+        .tab { flex: 1; text-align: center; padding: 12px 5px; color: #8bbee8; cursor: pointer; border-radius: 8px; font-size: 11px; font-weight: 700; transition: 0.2s; }
+        .tab.active { background: white; color: #001f3f; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .tab-content { display: none; animation: fadeIn 0.2s; }
         .tab-content.active { display: block; }
-        h2 { color: #004080; text-align: center; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; }
-        .section-header { color: #005a9c; font-weight: bold; margin-top: 15px; font-size: 14px; border-left: 5px solid #005a9c; padding: 6px 10px; background: #f0f7ff; }
-        label { display: block; margin-top: 10px; font-weight: 600; font-size: 11px; color: #666; text-transform: uppercase; }
-        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; font-weight: bold; }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        h2 { color: #004080; text-align: center; margin: 0 0 15px 0; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .section-header { color: #005a9c; font-weight: 800; margin-top: 15px; font-size: 13px; border-left: 4px solid #005a9c; padding: 5px 10px; background: #f0f7ff; border-radius: 0 5px 5px 0; }
+        label { display: block; margin-top: 12px; font-weight: 700; font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select { width: 100%; padding: 14px; margin-top: 5px; border: 1px solid #dde1e6; border-radius: 10px; box-sizing: border-box; font-size: 16px; font-weight: 600; background: #fcfcfc; appearance: none; }
+        input:focus, select:focus { border-color: #005a9c; outline: none; background: white; }
+        
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 15px; position: relative; overflow: hidden; transition: transform 0.1s; }
+        .btn:active { transform: scale(0.98); }
         .btn-blue { background: #005a9c; color: white; }
-        .btn-orange { background: #e67e22; color: white; margin-top: 15px; }
-        .result-box { background: #001f3f; color: white; padding: 20px; border-radius: 15px; text-align: center; margin-top: 20px; border: 2px solid #2ecc71; }
-        .result-val { font-size: 32px; font-weight: bold; color: #2ecc71; display: block; }
-        .engine-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .engine-box { background: #f8fafc; padding: 12px; border-radius: 15px; border-top: 4px solid #004080; }
-        #refModal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); overflow-y: auto; }
-        .modal-content { background: white; margin: 5% auto; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; font-size: 12px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        .btn-orange { background: #e67e22; color: white; }
+        
+        /* Estado de carga sutil */
+        .btn.loading { opacity: 0.7; pointer-events: none; }
+        .btn.loading::after { content: " ⏳"; }
+
+        .result-box { background: #001f3f; color: white; padding: 20px; border-radius: 15px; text-align: center; margin-top: 20px; border: 1px solid #2ecc71; }
+        .result-val { font-size: 36px; font-weight: 800; color: #2ecc71; display: block; line-height: 1; margin-bottom: 5px; }
+        
+        .engine-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .engine-box { background: #f8fafc; padding: 10px; border-radius: 12px; border-top: 4px solid #004080; }
+        
+        #refModal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); }
+        .modal-content { background: white; margin: 10% auto; padding: 20px; border-radius: 20px; width: 85%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        th, td { border: 1px solid #eee; padding: 8px 4px; text-align: center; }
         th { background: #001f3f; color: white; }
-        .footer { font-size: 10px; color: #aaa; text-align: center; margin-top: 20px; }
+        
+        #syncStatus { position: fixed; bottom: 10px; right: 10px; font-size: 10px; color: rgba(255,255,255,0.5); pointer-events: none; }
     </style>
 </head>
 <body>
@@ -39,26 +56,28 @@
 <div class="card">
     <div class="tab-container">
         <div class="tab active" onclick="switchTab('logbook')">LOGBOOK</div>
-        <div class="tab" onclick="switchTab('auditor')">FUEL AUDITOR</div>
-        <div class="tab" onclick="switchTab('range')">⚓ RANGE</div>
+        <div class="tab" onclick="switchTab('auditor')">AUDITOR</div>
+        <div class="tab" onclick="switchTab('range')">RANGE</div>
     </div>
 
     <div id="logbook" class="tab-content active">
-        <h2>Bitácora de Gastos</h2>
-        <label>Seleccionar Viaje:</label>
-        <select id="tripSelect" onchange="updateTotalDisplay()"><option value="">-- Conectando... --</option></select>
+        <h2>Bitácora Riviera 53</h2>
+        <label>Expedición Activa:</label>
+        <select id="tripSelect" onchange="updateTotalDisplay()"></select>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div><label>Nuevo Destino:</label><input type="text" id="newTripDest" placeholder="Ej: Culebra"></div>
-            <div><label>Fecha Salida:</label><input type="date" id="newTripDate"></div>
+        <div id="newTripPanel" style="display:none; margin-top:10px; background:#f9f9f9; padding:10px; border-radius:10px;">
+            <label>Nuevo Destino:</label><input type="text" id="newTripDest" placeholder="Ej: Vieques">
+            <label>Fecha:</label><input type="date" id="newTripDate">
+            <button class="btn btn-blue" onclick="createNewTrip()">CONFIRMAR VIAJE</button>
+            <button class="btn" style="background:#ddd; color:#333; padding:10px;" onclick="toggleNewTrip(false)">CANCELAR</button>
         </div>
-        <button class="btn btn-blue" onclick="createNewTrip()">🚀 CREAR EXPEDICIÓN</button>
+        <button id="btnShowNew" class="btn btn-blue" style="padding:10px; font-size:12px; margin-top:5px;" onclick="toggleNewTrip(true)">+ NUEVA EXPEDICIÓN</button>
 
-        <div class="section-header">Registro Diario</div>
+        <div class="section-header">Agregar Gasto</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div><label>Fecha Gasto:</label><input type="date" id="fechaGasto"></div>
+            <div><label>Fecha:</label><input type="date" id="fechaGasto"></div>
             <div>
-                <label>Categoría:</label>
+                <label>Concepto:</label>
                 <select id="cat">
                     <option value="Combustible">⛽ Diesel</option>
                     <option value="Muelle">⚓ Muelle</option>
@@ -69,77 +88,79 @@
             </div>
         </div>
         <label>Monto ($):</label>
-        <input type="number" id="monto" placeholder="0.00" inputmode="decimal">
-        <button class="btn btn-orange" onclick="addExpense()">➕ REGISTRAR PARTIDA</button>
+        <input type="number" id="monto" placeholder="0.00" inputmode="decimal" step="0.01">
+        <button id="btnAdd" class="btn btn-orange" onclick="addExpenseOptimistic()">REGISTRAR AHORA</button>
 
-        <div style="background: #eef6ff; padding: 15px; border-radius: 15px; margin-top: 20px; border: 2px solid #004080; text-align: center;">
-            <span style="font-size:12px; font-weight:bold; color:#004080;">TOTAL ACUMULADO:</span>
-            <span id="displayTotal" style="font-size: 28px; font-weight: bold; color: #d9534f; display: block;">$0.00</span>
+        <div style="background: #eef6ff; padding: 15px; border-radius: 15px; margin-top: 20px; border: 1px solid #b3d7ff; text-align: center;">
+            <span style="font-size:11px; font-weight:bold; color:#004080; letter-spacing:1px;">TOTAL DEL VIAJE</span>
+            <span id="displayTotal" style="font-size: 32px; font-weight: 800; color: #d9534f; display: block;">$0.00</span>
         </div>
     </div>
 
     <div id="auditor" class="tab-content">
-        <h2>Confirmar Consumo</h2>
-        <p style="text-align:center; font-size:12px; color:#666;">Basado en 51 GPH ideales</p>
-        <label>Galones Consumidos:</label><input type="number" id="galReal" oninput="calcFuel()">
-        <label>Horas de Motor:</label><input type="number" id="hrsReal" oninput="calcFuel()">
+        <h2>Fuel Auditor</h2>
+        <p style="text-align:center; font-size:12px; color:#888; margin:0;">Estándar: 51 GPH @ 2100 RPM</p>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div><label>Galones:</label><input type="number" id="galReal" inputmode="decimal" oninput="calcFuel()"></div>
+            <div><label>Horas:</label><input type="number" id="hrsReal" inputmode="decimal" oninput="calcFuel()"></div>
+        </div>
         <div class="result-box">
             <span id="resGPH" class="result-val">0.0</span>
-            <span style="font-size: 16px;">GPH (Combinado)</span>
-            <div id="fuelStatus" style="margin-top:10px; font-size:13px; font-weight:bold;"></div>
+            <span style="font-size: 14px; opacity:0.8;">GPH REAl</span>
+            <div id="fuelStatus" style="margin-top:10px; font-size:14px; font-weight:bold; padding:5px; border-radius:5px;"></div>
         </div>
     </div>
 
     <div id="range" class="tab-content">
-        <button onclick="toggleModal(true)" style="float:right; background:#005a9c; color:white; border:none; padding:5px 10px; border-radius:10px; font-size:10px;">📊 REF</button>
+        <button onclick="toggleModal(true)" style="float:right; background:#005a9c; color:white; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold;">VER TABLA</button>
         <h2>Safe Range Pro</h2>
-        <label>Diesel Actual (Gal):</label><input type="number" id="fuelRange" oninput="calculateRange()">
+        <label>Diesel Disponible (Gal):</label><input type="number" id="fuelRange" inputmode="numeric" oninput="calculateRange()">
+        
         <div class="engine-grid">
             <div class="engine-box">
-                <span style="font-size:9px; font-weight:bold; color:#004080; display:block; text-align:center;">PORT (MASTER)</span>
-                <label>RPM:</label><input type="number" id="rpmP" oninput="syncRPM()">
-                <label>GPH:</label><input type="number" id="gphP" oninput="calculateRange()">
+                <span style="font-size:10px; font-weight:900; color:#004080; display:block; text-align:center;">PORT</span>
+                <label>RPM:</label><input type="number" id="rpmP" inputmode="numeric" oninput="syncRPM()">
+                <label>GPH:</label><input type="number" id="gphP" inputmode="decimal" oninput="calculateRange()">
             </div>
             <div class="engine-box" style="border-top-color: #ef4444;">
-                <span style="font-size:9px; font-weight:bold; color:#ef4444; display:block; text-align:center;">STBD</span>
-                <label>RPM:</label><input type="number" id="rpmS" oninput="calculateRange()">
-                <label>GPH:</label><input type="number" id="gphS" oninput="calculateRange()">
+                <span style="font-size:10px; font-weight:900; color:#ef4444; display:block; text-align:center;">STBD</span>
+                <label>RPM:</label><input type="number" id="rpmS" inputmode="numeric" oninput="calculateRange()">
+                <label>GPH:</label><input type="number" id="gphS" inputmode="decimal" oninput="calculateRange()">
             </div>
         </div>
-        <label>Velocidad GPS (Kts):</label><input type="number" id="knotsRange" oninput="calculateRange()">
+        <label>Velocidad (Kts):</label><input type="number" id="knotsRange" inputmode="decimal" oninput="calculateRange()">
         <div class="result-box">
-            <span id="resRange" class="result-val" style="font-size:42px;">0</span>
-            <span style="font-size: 14px; font-weight: bold;">MILLAS (10% RES)</span>
+            <span id="resRange" class="result-val">0</span>
+            <span style="font-size: 14px; font-weight: bold;">MILLAS SEGURAS (10% RES)</span>
         </div>
     </div>
-
-    <div class="footer">Casco: RIY53032D415 | Fleet Command v9.8</div>
 </div>
 
-<div id="refModal">
+<div id="refModal" onclick="if(event.target == this) toggleModal(false)">
     <div class="modal-content">
-        <h3 style="color:#004080; margin-top:0; text-align:center;">📈 Tabla RIY53032D415</h3>
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-            <thead><tr style="background:#001f3f; color:white;"><th>RPM</th><th>Kts</th><th>GPH</th><th>NM*</th></tr></thead>
-            <tbody style="text-align:center;">
+        <h3 style="color:#004080; margin-top:0; text-align:center;">Rendimiento RIY53032D415</h3>
+        <table>
+            <thead><tr><th>RPM</th><th>Kts</th><th>GPH</th><th>NM</th></tr></thead>
+            <tbody>
                 <tr><td>600</td><td>6.0</td><td>2.5</td><td>1,998</td></tr>
                 <tr><td>1000</td><td>9.0</td><td>8.0</td><td>936</td></tr>
                 <tr><td>1500</td><td>12.0</td><td>22.0</td><td>454</td></tr>
-                <tr><td>1800</td><td>17.5</td><td>36.0</td><td>405</td></tr>
-                <tr><td>2000</td><td>22.5</td><td>46.0</td><td>407</td></tr>
-                <tr style="background:#eef6ff; font-weight:bold; color:#005a9c; border:2px solid #005a9c;"><td>2100</td><td>24.8</td><td>51.0</td><td>405</td></tr>
-                <tr><td>2200</td><td>27.2</td><td>58.0</td><td>390</td></tr>
+                <tr style="background:#eef6ff; font-weight:bold; color:#005a9c;"><td>2100</td><td>24.8</td><td>51.0</td><td>405</td></tr>
                 <tr><td>2300</td><td>29.5</td><td>64.0</td><td>383</td></tr>
                 <tr><td>2500</td><td>33.5</td><td>74.0</td><td>377</td></tr>
             </tbody>
         </table>
-        <button onclick="toggleModal(false)" style="width:100%; padding:12px; background:#d9534f; color:white; border:none; border-radius:10px; margin-top:15px; font-weight:bold;">CERRAR</button>
+        <button onclick="toggleModal(false)" class="btn" style="background:#d9534f; color:white; margin-top:15px; padding:12px;">CERRAR</button>
     </div>
 </div>
+<div id="syncStatus">Listo</div>
 
-<script>const scriptURL = 'https://script.google.com/macros/s/AKfycbyZEmBTB7xtMUngAfG3RmfKSwNhrLibrbe1WejAmyUNwzfPolDiRKyeWyvGt2rCKsS1/exec';
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyZEmBTB7xtMUngAfG3RmfKSwNhrLibrbe1WejAmyUNwzfPolDiRKyeWyvGt2rCKsS1/exec';
     let listaViajes = [];
+    const CACHE_KEY = 'riviera_trips_v1';
 
+    // === LÓGICA DE UI ===
     function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -148,73 +169,21 @@
     }
 
     function toggleModal(show) { document.getElementById('refModal').style.display = show ? 'block' : 'none'; }
-    function syncRPM() { document.getElementById('rpmS').value = document.getElementById('rpmP').value; calculateRange(); }
+    function toggleNewTrip(show) { 
+        document.getElementById('newTripPanel').style.display = show ? 'block' : 'none'; 
+        document.getElementById('btnShowNew').style.display = show ? 'none' : 'block';
+    }
 
+    // === CÁLCULOS LOCALES (Instantáneos) ===
+    function syncRPM() { document.getElementById('rpmS').value = document.getElementById('rpmP').value; calculateRange(); }
+    
     function calculateRange() {
         const fuel = parseFloat(document.getElementById('fuelRange').value) || 0;
-        const totalBurn = (parseFloat(document.getElementById('gphP').value) || 0) + (parseFloat(document.getElementById('gphS').value) || 0);
-        const knots = parseFloat(document.getElementById('knotsRange').value) || 0;
-        if(totalBurn > 0 && knots > 0) {
-            const range = (fuel * 0.90) * (knots / totalBurn);
-            document.getElementById('resRange').innerText = Math.floor(range);
+        const burn = (parseFloat(document.getElementById('gphP').value) || 0) + (parseFloat(document.getElementById('gphS').value) || 0);
+        const kts = parseFloat(document.getElementById('knotsRange').value) || 0;
+        if(burn > 0 && kts > 0) {
+            document.getElementById('resRange').innerText = Math.floor((fuel * 0.90) * (kts / burn));
         }
-    }
-
-    // CARGA DE VIAJES CORREGIDA
-    async function cargarViajes(nombreASeleccionar = null) {
-        const select = document.getElementById('tripSelect');
-        // Mantener el mensaje de carga mientras llegan los datos
-        select.innerHTML = '<option value="">-- Selecciona viaje --</option>';
-        
-        try {
-            const response = await fetch(scriptURL);
-            listaViajes = await response.json();
-            
-            // Re-escribir el menú solo una vez al recibir la data
-            let options = '<option value="">-- Selecciona viaje --</option>';
-            
-            if (listaViajes && listaViajes.length > 0) {
-                listaViajes.forEach(v => {
-                    options += `<option value="${v.nombre}">${v.nombre}</option>`;
-                });
-                select.innerHTML = options;
-            } else {
-                select.innerHTML = '<option value="">No hay viajes en Drive</option>';
-            }
-
-            if (nombreASeleccionar) { 
-                select.value = nombreASeleccionar; 
-                updateTotalDisplay(); 
-            }
-        } catch (e) { 
-            console.error("Error Drive");
-            select.innerHTML = '<option value="">❌ Error de conexión</option>';
-        }
-    }
-
-    function updateTotalDisplay() {
-        const nombre = document.getElementById('tripSelect').value;
-        const viaje = listaViajes.find(v => v.nombre === nombre);
-        document.getElementById('displayTotal').innerText = viaje ? `$${viaje.total.toFixed(2)}` : "$0.00";
-    }
-
-    async function createNewTrip() {
-        const dest = document.getElementById('newTripDest').value;
-        const date = document.getElementById('newTripDate').value;
-        if(!dest || !date) return alert("Faltan datos");
-        const name = `${dest} - ${date}`;
-        await enviar({ type: "NUEVO_VIAJE", tripName: name, fecha: date });
-        document.getElementById('newTripDest').value = "";
-        cargarViajes(name);
-    }
-
-    async function addExpense() {
-        const name = document.getElementById('tripSelect').value;
-        const monto = parseFloat(document.getElementById('monto').value);
-        if(!name || isNaN(monto)) return alert("Selecciona viaje y pon monto");
-        await enviar({ type: "GASTO_DETALLE", tripName: name, categoria: document.getElementById('cat').value, monto: monto, fecha: new Date().toISOString().split('T')[0] });
-        document.getElementById('monto').value = "";
-        setTimeout(() => cargarViajes(name), 1500);
     }
 
     function calcFuel() {
@@ -225,24 +194,127 @@
             document.getElementById('resGPH').innerText = real.toFixed(1);
             const status = document.getElementById('fuelStatus');
             const diff = real - 51;
-            if(Math.abs(diff) < 2) { status.innerText = "✅ RANGO OK (51 GPH)"; status.style.color = "#2ecc71"; }
-            else if(diff > 2) { status.innerText = "⚠️ ELEVADO (+" + diff.toFixed(1) + ")"; status.style.color = "#e74c3c"; }
-            else { status.innerText = "⚓ EFICIENTE"; status.style.color = "#3498db"; }
+            status.innerHTML = Math.abs(diff) < 2 ? "✅ NORMAL" : (diff > 0 ? "⚠️ ALTO CONSUMO" : "⚓ BAJO CONSUMO");
+            status.style.backgroundColor = Math.abs(diff) < 2 ? "#d4edda" : (diff > 0 ? "#f8d7da" : "#cce5ff");
+            status.style.color = Math.abs(diff) < 2 ? "#155724" : (diff > 0 ? "#721c24" : "#004085");
         }
     }
 
-    async function enviar(data) {
-        try {
-            await fetch(scriptURL, { method: 'POST', mode: 'no-cors', cache: 'no-cache', body: JSON.stringify(data) });
-            alert("✅ Drive Actualizado");
-        } catch (e) { alert("❌ Error"); }
+    // === CORE: GESTIÓN DE DATOS OPTIMIZADA ===
+    
+    // 1. Carga Híbrida (Caché -> Luego Red)
+    function initData() {
+        // Cargar caché inmediatamente
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+            listaViajes = JSON.parse(cached);
+            renderTripSelect();
+            updateTotalDisplay();
+            console.log("Cargado desde caché local");
+        } else {
+            document.getElementById('tripSelect').innerHTML = '<option>Cargando...</option>';
+        }
+        // Actualizar en segundo plano
+        fetchTripsBackground();
     }
 
-    // Inicialización al cargar la ventana
+    async function fetchTripsBackground() {
+        setStatus("Sincronizando...");
+        try {
+            const response = await fetch(scriptURL);
+            const data = await response.json();
+            listaViajes = data;
+            localStorage.setItem(CACHE_KEY, JSON.stringify(listaViajes)); // Guardar en caché
+            renderTripSelect();
+            updateTotalDisplay();
+            setStatus("Sincronizado");
+        } catch (e) {
+            setStatus("Offline - Usando datos locales");
+        }
+    }
+
+    function renderTripSelect() {
+        const select = document.getElementById('tripSelect');
+        const currentVal = select.value; // Preservar selección si existe
+        let html = '';
+        listaViajes.forEach(v => {
+            html += `<option value="${v.nombre}">${v.nombre}</option>`;
+        });
+        select.innerHTML = html;
+        if(currentVal && listaViajes.some(v => v.nombre === currentVal)) select.value = currentVal;
+    }
+
+    // 2. Add Expense Optimista (Actualiza UI -> Luego Envía)
+    function addExpenseOptimistic() {
+        const tripName = document.getElementById('tripSelect').value;
+        const montoVal = parseFloat(document.getElementById('monto').value);
+        const cat = document.getElementById('cat').value;
+        const fecha = document.getElementById('fechaGasto').value;
+
+        if(!tripName || isNaN(montoVal)) return alert("Falta viaje o monto");
+
+        // A. Actualización Visual Inmediata
+        const viajeIndex = listaViajes.findIndex(v => v.nombre === tripName);
+        if(viajeIndex >= 0) {
+            listaViajes[viajeIndex].total += montoVal; // Sumar localmente
+            localStorage.setItem(CACHE_KEY, JSON.stringify(listaViajes)); // Guardar localmente
+            updateTotalDisplay(); // Reflejar en pantalla
+        }
+        
+        // Limpiar formulario inmediatamente
+        document.getElementById('monto').value = "";
+        
+        // B. Enviar a Servidor (Fire & Forget)
+        const btn = document.getElementById('btnAdd');
+        btn.innerText = "GUARDANDO...";
+        btn.classList.add('loading');
+
+        fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ type: "GASTO_DETALLE", tripName: tripName, categoria: cat, monto: montoVal, fecha: fecha })
+        }).then(() => {
+            btn.innerText = "REGISTRAR AHORA";
+            btn.classList.remove('loading');
+            setStatus("Guardado en Nube");
+        }).catch(e => {
+            alert("Error guardando en nube, pero guardado localmente (revisa conexión)");
+            btn.innerText = "REGISTRAR AHORA";
+            btn.classList.remove('loading');
+        });
+    }
+
+    async function createNewTrip() {
+        const dest = document.getElementById('newTripDest').value;
+        const date = document.getElementById('newTripDate').value;
+        if(!dest) return;
+        const name = `${dest} - ${date}`;
+        
+        // Optimista: Agregar a lista local
+        listaViajes.unshift({ nombre: name, total: 0 });
+        localStorage.setItem(CACHE_KEY, JSON.stringify(listaViajes));
+        renderTripSelect();
+        document.getElementById('tripSelect').value = name;
+        updateTotalDisplay();
+        toggleNewTrip(false);
+
+        // Enviar
+        await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: "NUEVO_VIAJE", tripName: name, fecha: date }) });
+    }
+
+    function updateTotalDisplay() {
+        const nombre = document.getElementById('tripSelect').value;
+        const viaje = listaViajes.find(v => v.nombre === nombre);
+        document.getElementById('displayTotal').innerText = viaje ? `$${viaje.total.toFixed(2)}` : "$0.00";
+    }
+
+    function setStatus(msg) { document.getElementById('syncStatus').innerText = msg; }
+
+    // Init
     window.onload = function() {
         document.getElementById('newTripDate').value = new Date().toISOString().split('T')[0];
         document.getElementById('fechaGasto').value = new Date().toISOString().split('T')[0];
-        cargarViajes();
+        initData();
     };
 </script>
 </body>
