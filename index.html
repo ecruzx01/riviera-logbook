@@ -161,17 +161,35 @@
         }
     }
 
-    async function cargarViajes(nombreASeleccionar = null) {
+async function cargarViajes(nombreASeleccionar = null) {
+        const select = document.getElementById('tripSelect');
+        // Esto asegura que el mensaje salga mientras carga
+        select.innerHTML = '<option value="">-- Selecciona viaje --</option>';
+        
         try {
             const response = await fetch(scriptURL);
             listaViajes = await response.json();
-            const select = document.getElementById('tripSelect');
+            
+            // Volvemos a limpiar para insertar los viajes reales
             select.innerHTML = '<option value="">-- Selecciona viaje --</option>';
-            listaViajes.forEach(v => { select.innerHTML += `<option value="${v.nombre}">${v.nombre}</option>`; });
-            if (nombreASeleccionar) { select.value = nombreASeleccionar; updateTotalDisplay(); }
-        } catch (e) { console.error("Error Drive"); }
-    }
+            
+            if (listaViajes.length > 0) {
+                listaViajes.forEach(v => {
+                    select.innerHTML += `<option value="${v.nombre}">${v.nombre}</option>`;
+                });
+            } else {
+                select.innerHTML = '<option value="">No hay viajes guardados</option>';
+            }
 
+            if (nombreASeleccionar) { 
+                select.value = nombreASeleccionar; 
+                updateTotalDisplay(); 
+            }
+        } catch (e) { 
+            console.error("Error Drive");
+            select.innerHTML = '<option value="">❌ Error al cargar</option>';
+        }
+    }
     function updateTotalDisplay() {
         const nombre = document.getElementById('tripSelect').value;
         const viaje = listaViajes.find(v => v.nombre === nombre);
