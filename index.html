@@ -10,23 +10,23 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #001f3f; padding: 10px; color: #333; margin: 0; }
         .card { background: white; padding: 20px; border-radius: 20px; max-width: 450px; margin: 10px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
+
         /* Sistema de Pestañas */
-        .tab-container { display: flex; background: #002b55; border-radius: 12px; margin-bottom: 20px; padding: 5px; }
-        .tab { flex: 1; text-align: center; padding: 10px; color: white; cursor: pointer; border-radius: 8px; font-size: 13px; font-weight: bold; transition: 0.3s; }
+        .tab-container { display: flex; background: #002b55; border-radius: 12px; margin-bottom: 20px; padding: 5px; gap: 5px; }
+        .tab { flex: 1; text-align: center; padding: 10px 5px; color: white; cursor: pointer; border-radius: 8px; font-size: 11px; font-weight: bold; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
         .tab.active { background: white; color: #001f3f; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        h2 { color: #004080; text-align: center; margin-bottom: 15px; font-size: 20px; text-transform: uppercase; }
+        h2 { color: #004080; text-align: center; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; }
         .section-header { color: #005a9c; font-weight: bold; margin-top: 15px; font-size: 14px; border-left: 5px solid #005a9c; padding: 6px 10px; background: #f0f7ff; }
         label { display: block; margin-top: 10px; font-weight: 600; font-size: 12px; color: #666; }
         input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-        
+
         .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-blue { background: #005a9c; color: white; }
         .btn-orange { background: #e67e22; color: white; margin-top: 15px; }
-        
+
         /* Estilos Auditoría */
         .result-box { background: #001f3f; color: white; padding: 20px; border-radius: 15px; text-align: center; margin-top: 20px; }
         .result-val { font-size: 32px; font-weight: bold; color: #2ecc71; display: block; }
@@ -41,6 +41,7 @@
     <div class="tab-container">
         <div class="tab active" onclick="switchTab('logbook')">LOGBOOK</div>
         <div class="tab" onclick="switchTab('auditor')">FUEL AUDITOR</div>
+        <div class="tab" onclick="abrirRange()" style="background: #2ecc71; color: white;">⚓ RANGE</div>
     </div>
 
     <div id="logbook" class="tab-content active">
@@ -83,10 +84,10 @@
     <div id="auditor" class="tab-content">
         <h2>Confirmar Consumo</h2>
         <p style="text-align:center; font-size:12px; color:#666;">Basado en 51 GPH ideales</p>
-        
+
         <label>Galones Consumidos (Reales):</label>
         <input type="number" id="galReal" placeholder="Lo que echaste en el tanque" oninput="calcFuel()">
-        
+
         <label>Horas de Motor (Trayecto):</label>
         <input type="number" id="hrsReal" placeholder="Horas exactas" oninput="calcFuel()">
 
@@ -99,18 +100,29 @@
         <p style="font-size:11px; margin-top:15px;">* Un consumo mayor a 51 GPH a 2100 RPM puede indicar necesidad de limpieza de fondo o revisión de motores.</p>
     </div>
 
-    <div class="footer">Casco: RIY53032D415 | Fleet Command v8.0</div>
+    <div class="footer">Casco: RIY53032D415 | Fleet Command v8.5</div>
 </div>
 
 <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyZEmBTB7xtMUngAfG3RmfKSwNhrLibrbe1WejAmyUNwzfPolDiRKyeWyvGt2rCKsS1/exec';
     let listaViajes = [];
 
+    // CAMBIO DE PESTAÑAS CORREGIDO
     function switchTab(tabId) {
+        // Ocultar todos
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        // Desactivar todos los botones
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        
+        // Mostrar el seleccionado
         document.getElementById(tabId).classList.add('active');
+        // Activar el botón clicado
         event.currentTarget.classList.add('active');
+    }
+
+    // ABRIR APP DE RANGO (Ajusta tu URL de GitHub aquí)
+    function abrirRange() {
+        window.open('https://tu-usuario.github.io/riviera-range-pro/', '_blank');
     }
 
     async function cargarViajes(nombreASeleccionar = null) {
@@ -165,24 +177,22 @@
         }
     }
 
-async function enviar(data) {
-    try {
-        // Añadimos un pequeño log para ver si intenta enviar
-        console.log("Enviando a Drive...", data);
-        
-        await fetch(scriptURL, { 
-            method: 'POST', 
-            mode: 'no-cors', // Importante para Google Scripts
-            cache: 'no-cache',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data) 
-        });
-        alert("✅ Registrado en Google Drive");
-    } catch (e) { 
-        console.error("Error de conexión:", e);
-        alert("❌ Error de red: No se pudo conectar a Google Sheets"); 
+    async function enviar(data) {
+        try {
+            console.log("Enviando a Drive...", data);
+            await fetch(scriptURL, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data) 
+            });
+            alert("✅ Registrado en Google Drive");
+        } catch (e) { 
+            console.error("Error de conexión:", e);
+            alert("❌ Error de red: No se pudo conectar a Google Sheets"); 
+        }
     }
-}
 
     document.getElementById('newTripDate').value = new Date().toISOString().split('T')[0];
     document.getElementById('fechaGasto').value = new Date().toISOString().split('T')[0];
