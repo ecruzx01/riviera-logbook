@@ -23,11 +23,11 @@
         .btn-blue { background: #005a9c; color: white; }
         .btn-orange { background: #e67e22; color: white; margin-top: 15px; }
         .result-box { background: #001f3f; color: white; padding: 20px; border-radius: 15px; text-align: center; margin-top: 20px; border: 2px solid #2ecc71; }
-        .result-val { font-size: 42px; font-weight: bold; color: #2ecc71; display: block; }
+        .result-val { font-size: 32px; font-weight: bold; color: #2ecc71; display: block; }
         .engine-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .engine-box { background: #f8fafc; padding: 12px; border-radius: 15px; border-top: 4px solid #004080; }
         #refModal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); overflow-y: auto; }
-        .modal-content { background: white; margin: 10% auto; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; font-size: 12px; }
+        .modal-content { background: white; margin: 5% auto; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; font-size: 12px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background: #001f3f; color: white; }
@@ -39,26 +39,35 @@
 <div class="card">
     <div class="tab-container">
         <div class="tab active" onclick="switchTab('logbook')">LOGBOOK</div>
-        <div class="tab" onclick="switchTab('auditor')">AUDITOR</div>
+        <div class="tab" onclick="switchTab('auditor')">FUEL AUDITOR</div>
         <div class="tab" onclick="switchTab('range')">⚓ RANGE</div>
     </div>
 
     <div id="logbook" class="tab-content active">
         <h2>Bitácora de Gastos</h2>
-        <label>Viaje Actual:</label>
+        <label>Seleccionar Viaje:</label>
         <select id="tripSelect" onchange="updateTotalDisplay()"><option value="">-- Conectando... --</option></select>
-        <button class="btn btn-blue" onclick="createNewTrip()">🚀 NUEVA EXPEDICIÓN</button>
         
-        <div class="section-header">Registro de Gastos</div>
-        <label>Categoría / Partida:</label>
-        <select id="cat">
-            <option value="Combustible">⛽ Diesel</option>
-            <option value="Muelle">⚓ Muelle</option>
-            <option value="Groceries">🛒 Comida</option>
-            <option value="F&B">🍽️ F&B</option>
-            <option value="Otros">⚙️ Otros</option>
-        </select>
-        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><label>Nuevo Destino:</label><input type="text" id="newTripDest" placeholder="Ej: Culebra"></div>
+            <div><label>Fecha Salida:</label><input type="date" id="newTripDate"></div>
+        </div>
+        <button class="btn btn-blue" onclick="createNewTrip()">🚀 CREAR EXPEDICIÓN</button>
+
+        <div class="section-header">Registro Diario</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><label>Fecha Gasto:</label><input type="date" id="fechaGasto"></div>
+            <div>
+                <label>Categoría:</label>
+                <select id="cat">
+                    <option value="Combustible">⛽ Diesel</option>
+                    <option value="Muelle">⚓ Muelle</option>
+                    <option value="Groceries">🛒 Comida</option>
+                    <option value="F&B">🍽️ F&B</option>
+                    <option value="Otros">⚙️ Otros</option>
+                </select>
+            </div>
+        </div>
         <label>Monto ($):</label>
         <input type="number" id="monto" placeholder="0.00" inputmode="decimal">
         <button class="btn btn-orange" onclick="addExpense()">➕ REGISTRAR PARTIDA</button>
@@ -71,10 +80,11 @@
 
     <div id="auditor" class="tab-content">
         <h2>Confirmar Consumo</h2>
-        <label>Galones Reales:</label><input type="number" id="galReal" oninput="calcFuel()">
-        <label>Horas Motor:</label><input type="number" id="hrsReal" oninput="calcFuel()">
-        <div class="result-box" style="background:#001f3f;">
-            <span id="resGPH" class="result-val" style="font-size:32px;">0.0</span>
+        <p style="text-align:center; font-size:12px; color:#666;">Basado en 51 GPH ideales</p>
+        <label>Galones Consumidos:</label><input type="number" id="galReal" oninput="calcFuel()">
+        <label>Horas de Motor:</label><input type="number" id="hrsReal" oninput="calcFuel()">
+        <div class="result-box">
+            <span id="resGPH" class="result-val">0.0</span>
             <span style="font-size: 16px;">GPH (Combinado)</span>
             <div id="fuelStatus" style="margin-top:10px; font-size:13px; font-weight:bold;"></div>
         </div>
@@ -96,46 +106,34 @@
                 <label>GPH:</label><input type="number" id="gphS" oninput="calculateRange()">
             </div>
         </div>
-        <label>SOG (Knots):</label><input type="number" id="knotsRange" oninput="calculateRange()">
+        <label>Velocidad GPS (Kts):</label><input type="number" id="knotsRange" oninput="calculateRange()">
         <div class="result-box">
-            <span id="resRange" class="result-val">0</span>
+            <span id="resRange" class="result-val" style="font-size:42px;">0</span>
             <span style="font-size: 14px; font-weight: bold;">MILLAS (10% RES)</span>
         </div>
     </div>
 
-    <div class="footer">Casco: RIY53032D415 | Fleet Command v9.6</div>
+    <div class="footer">Casco: RIY53032D415 | Fleet Command v9.8</div>
 </div>
 
 <div id="refModal">
     <div class="modal-content">
-        <h3 style="color:#004080; margin-top:0; text-align:center; font-size:16px;">📈 PERFORMANCE: RIY53032D415</h3>
+        <h3 style="color:#004080; margin-top:0; text-align:center;">📈 Tabla RIY53032D415</h3>
         <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-            <thead>
-                <tr style="background: #001f3f; color: white;">
-                    <th>RPM</th>
-                    <th>Kts</th>
-                    <th>GPH</th>
-                    <th>NM*</th>
-                </tr>
-            </thead>
-            <tbody style="text-align: center;">
+            <thead><tr style="background:#001f3f; color:white;"><th>RPM</th><th>Kts</th><th>GPH</th><th>NM*</th></tr></thead>
+            <tbody style="text-align:center;">
                 <tr><td>600</td><td>6.0</td><td>2.5</td><td>1,998</td></tr>
                 <tr><td>1000</td><td>9.0</td><td>8.0</td><td>936</td></tr>
                 <tr><td>1500</td><td>12.0</td><td>22.0</td><td>454</td></tr>
                 <tr><td>1800</td><td>17.5</td><td>36.0</td><td>405</td></tr>
                 <tr><td>2000</td><td>22.5</td><td>46.0</td><td>407</td></tr>
-                <tr style="background: #eef6ff; font-weight: bold; color: #005a9c; border: 2px solid #005a9c;">
-                    <td>2100</td><td>24.8</td><td>51.0</td><td>405</td></tr>
+                <tr style="background:#eef6ff; font-weight:bold; color:#005a9c; border:2px solid #005a9c;"><td>2100</td><td>24.8</td><td>51.0</td><td>405</td></tr>
                 <tr><td>2200</td><td>27.2</td><td>58.0</td><td>390</td></tr>
                 <tr><td>2300</td><td>29.5</td><td>64.0</td><td>383</td></tr>
                 <tr><td>2500</td><td>33.5</td><td>74.0</td><td>377</td></tr>
             </tbody>
         </table>
-        <p style="font-size: 9px; color: #666; margin-top: 10px; line-height: 1.2;">
-            * El rango (NM) es teórico basado en el 100% de la capacidad del tanque. 
-            ** Tu App calcula el rango seguro restando un 10% de reserva.
-        </p>
-        <button onclick="toggleModal(false)" style="width:100%; padding:15px; background:#d9534f; color:white; border:none; border-radius:12px; margin-top:10px; font-weight:bold; cursor:pointer;">CERRAR</button>
+        <button onclick="toggleModal(false)" style="width:100%; padding:12px; background:#d9534f; color:white; border:none; border-radius:10px; margin-top:15px; font-weight:bold;">CERRAR</button>
     </div>
 </div>
 
@@ -180,22 +178,48 @@
         document.getElementById('displayTotal').innerText = viaje ? `$${viaje.total.toFixed(2)}` : "$0.00";
     }
 
+    async function createNewTrip() {
+        const dest = document.getElementById('newTripDest').value;
+        const date = document.getElementById('newTripDate').value;
+        if(!dest || !date) return alert("Faltan datos");
+        const name = `${dest} - ${date}`;
+        await enviar({ type: "NUEVO_VIAJE", tripName: name, fecha: date });
+        document.getElementById('newTripDest').value = "";
+        cargarViajes(name);
+    }
+
     async function addExpense() {
         const name = document.getElementById('tripSelect').value;
         const monto = parseFloat(document.getElementById('monto').value);
         if(!name || isNaN(monto)) return alert("Selecciona viaje y pon monto");
-        await enviar({ type: "GASTO_DETALLE", tripName: name, categoria: document.getElementById('cat').value, monto: monto, fecha: new Date().toISOString().split('T')[0] });
+        await enviar({ type: "GASTO_DETALLE", tripName: name, categoria: document.getElementById('cat').value, monto: monto, fecha: document.getElementById('fechaGasto').value });
         document.getElementById('monto').value = "";
         setTimeout(() => cargarViajes(name), 1500);
+    }
+
+    function calcFuel() {
+        const gal = parseFloat(document.getElementById('galReal').value) || 0;
+        const hrs = parseFloat(document.getElementById('hrsReal').value) || 0;
+        if(gal > 0 && hrs > 0) {
+            const real = gal / hrs;
+            document.getElementById('resGPH').innerText = real.toFixed(1);
+            const status = document.getElementById('fuelStatus');
+            const diff = real - 51;
+            if(Math.abs(diff) < 2) { status.innerText = "✅ RANGO OK (51 GPH)"; status.style.color = "#2ecc71"; }
+            else if(diff > 2) { status.innerText = "⚠️ ELEVADO (+" + diff.toFixed(1) + ")"; status.style.color = "#e74c3c"; }
+            else { status.innerText = "⚓ EFICIENTE"; status.style.color = "#3498db"; }
+        }
     }
 
     async function enviar(data) {
         try {
             await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-            alert("✅ Registrado en Google Drive");
-        } catch (e) { alert("❌ Error de red"); }
+            alert("✅ Drive Actualizado");
+        } catch (e) { alert("❌ Error"); }
     }
 
+    document.getElementById('newTripDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('fechaGasto').value = new Date().toISOString().split('T')[0];
     window.onload = cargarViajes;
 </script>
 </body>
