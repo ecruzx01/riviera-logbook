@@ -250,11 +250,12 @@
         <input type="text" id="searchService" placeholder="🔍 Buscar vendor, repuesto o sistema..." onkeyup="filterServices()" style="margin-bottom: 10px; font-size: 14px;">
         <div id="serviceHistory" style="max-height: 350px; overflow-y: auto; font-size: 12px; background: #f8fafc; padding: 10px; border-radius: 10px;"><p style="text-align:center; color:#666;">El historial aparecerá aquí tras sincronizar.</p></div>
     </div>
-    <div class="footer">Fairline Squadron 65 | 2x CAT C-18 ACERT | 936 Gal | Fleet Command v20.0</div>
+    <div class="footer">Fairline Squadron 65 | 2x CAT C-18 ACERT | 936 Gal | Fleet Command v21.0</div>
 </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbyOo3ZXC6OEmAxOmlTV3jzbpkwNnJVrAbNXe_qeoFxLGZ76sV3dZRM4Oy4GprKkawh1/exec';
+    // 👇👇 RECUERDA PEGAR TU LINK AQUI ABAJO 👇👇
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbx-horuWIwsZdg6YLz0kr7auEfLIDie79UHO1kYvctYepPJ38CRZvsSA7fqDIUk_ELg/exec';
     
     let listaViajes = []; let serviceData = []; let equipmentData = [];
 
@@ -459,9 +460,21 @@
         const select = document.getElementById('tripSelect'); select.innerHTML = '<option value="">-- Cargando... --</option>';
         if (!navigator.onLine) { listaViajes = JSON.parse(localStorage.getItem('fairlineTrips')) || []; llenarDropdownViajes(nombreASeleccionar); return; }
         try {
-            const response = await fetch(scriptURL); listaViajes = await response.json();
-            localStorage.setItem('fairlineTrips', JSON.stringify(listaViajes)); llenarDropdownViajes(nombreASeleccionar);
-        } catch (e) { listaViajes = JSON.parse(localStorage.getItem('fairlineTrips')) || []; llenarDropdownViajes(nombreASeleccionar); }
+            const response = await fetch(scriptURL);
+            const data = await response.json();
+            
+            // DETECTOR DE ERRORES DE GOOGLE
+            if (data.error) {
+                alert("⚠️ Error desde Google Sheets: " + data.error + "\nPor favor, verifica que el nombre de tus pestañas (Viajes, Gastos, etc.) esté correcto y sin espacios.");
+                listaViajes = JSON.parse(localStorage.getItem('fairlineTrips')) || [];
+            } else {
+                listaViajes = Array.isArray(data) ? data : [];
+                localStorage.setItem('fairlineTrips', JSON.stringify(listaViajes));
+            }
+            llenarDropdownViajes(nombreASeleccionar);
+        } catch (e) { 
+            listaViajes = JSON.parse(localStorage.getItem('fairlineTrips')) || []; llenarDropdownViajes(nombreASeleccionar); 
+        }
     }
 
     function updateTotalDisplay() {
@@ -493,6 +506,9 @@
         const name = `${dest} - ${date}`;
         const payload = { type: "NUEVO_VIAJE", tripName: name, fecha: date };
         
+        // ASEGURAR QUE LISTAVIAJES ES UN ARRAY
+        if (!Array.isArray(listaViajes)) { listaViajes = []; }
+        
         listaViajes.push({ nombre: name, total: 0, gastos: [] }); 
         localStorage.setItem('fairlineTrips', JSON.stringify(listaViajes));
         
@@ -514,7 +530,7 @@
                 alert("✅ Expedición creada exitosamente.");
                 if(btn) btn.innerText = "🚀 CREAR EXPEDICIÓN";
             } catch (e) {
-                alert("❌ Error de conexión al crear viaje.");
+                alert("❌ Error de conexión al crear viaje en la nube. Se guardó localmente.");
             }
         }
         
@@ -535,6 +551,7 @@
             const fecha = document.getElementById('fechaGasto').value; const cat = document.getElementById('cat').value;
             const payload = { type: "GASTO_DETALLE", tripName: name, categoria: cat, monto: monto, fecha: fecha, filename: filename, mimeType: mimeType, fileData: fileData };
             
+            if (!Array.isArray(listaViajes)) { listaViajes = []; }
             let viajeLocal = listaViajes.find(v => v.nombre === name);
             if (viajeLocal) {
                 viajeLocal.total += monto; if (!viajeLocal.gastos) viajeLocal.gastos = [];
